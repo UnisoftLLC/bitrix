@@ -28,8 +28,8 @@ class matching extends mytpl{
     static function getStoreIdByCode($storeCode){
         CModule::IncludeModule('iblock');
         $res = CIBlockElement::GetList(array(),
-                                       array("IBLOCK_ID" => self::$store_iblock_id,
-                                             "PROPERTY_STORE_CODE" => $storeCode),
+                                        array("IBLOCK_ID" => self::$store_iblock_id,
+                                              "PROPERTY_STORE_CODE" => $storeCode),
                                        false, false, array("ID", "IBLOCK_ID", "CODE"));
         if($ob = $res->GetNextElement()){
            $arFields = $ob->GetFields();

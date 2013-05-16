@@ -7,10 +7,9 @@ require_once($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/remains/include.php");
 CModule::IncludeModule('iblock');
 
 $sTableID = "tbl_options34"; // ID таблицы
-$oSort = new CAdminSorting($sTableID, "ID", "desc"); // объект сортировки
+$oSort = new CAdminSorting($sTableID, "ID", "DESC"); // объект сортировки
 $lAdmin = new CAdminList($sTableID, $oSort); // основной объект списка
- 
-
+  
  $remainsLog = new remainsLog();
  
  $arF = array();
@@ -23,20 +22,17 @@ $lAdmin = new CAdminList($sTableID, $oSort); // основной объект с
      $s = 'Проблемные запуски';
       
  }
-
-
  
 $rsData = $remainsLog->GetList(array($by=>$order), $arF);
  
 $rsData = new CAdminResult($rsData, $sTableID);
 $rsData->NavStart();  
 $lAdmin->NavText($rsData->GetNavPrint($s));
- 
-
+  
 $lAdmin->AddHeaders(array(
   array("id"    =>"ID",
     "content"  =>"ID",
-    "sort"     =>"id",
+    "sort"     =>"ID", 
     "default"  =>true, 
   ),
   array(  "id"    =>"DATE",
@@ -71,11 +67,8 @@ $lAdmin->AddHeaders(array(
     "sort"     =>"TIME",
     "default"  =>true,
   ), 
-     
-    
-    
+      
 ));
-
  
 
 while($arRes = $rsData->NavNext(true, "f_")):
@@ -103,8 +96,7 @@ require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/prolog_admin_aft
  
 </div> 
  
-<?
- 
+<? 
 $lAdmin->DisplayList();
 require($_SERVER["DOCUMENT_ROOT"]."/bitrix/modules/main/include/epilog_admin.php");
  

@@ -69,19 +69,19 @@ $lAdmin = new CAdminList($sTableID, $oSort); // основной объект с
 //
 //	}
 //}
-
-$rsData = yandexPrices::GetList(array(),array());
+ 
+$rsData = yandexPrices::GetList(array($_REQUEST['by'] => $_REQUEST['order']),array());
 $rsData = new CAdminResult($rsData, $sTableID);
 $rsData->NavStart();
 
 $lAdmin->NavText($rsData->GetNavPrint('Цены Яндекс.Маркет'));
-
+ 
 $lAdmin->AddHeaders(array(
-  array("id"    =>"ID",
-    "content"  =>"ID",
-    "sort"     =>"id",
-    "default"  =>true, 
-  ),
+//  array("id"    =>"ID",
+//    "content"  =>"ID",
+//    "sort"     =>"id",
+//    "default"  =>true, 
+//  ),
   array(  "id"    =>"ITEM_ID",
     "content"  =>'Товар', 
     "sort"     =>"ITEM_ID",
@@ -106,12 +106,7 @@ $lAdmin->AddHeaders(array(
     "content"  =>'Цена доставки',
     "sort"     =>"DELIVERY", 
     "default"  =>true,
-  ),  
-    
-    
-    
-    
-    
+  ), 
 ));
 
 
@@ -127,10 +122,12 @@ function _makeName($itemId){
 
     $res = CIBlockElement::GetByID($itemId);
     if($ar_res = $res->GetNext()) 
-         $cachearr[$itemId] = " [ $itemId ] {$ar_res['NAME']}";
- 
+         $cachearr[$itemId] = "[ $itemId ] {$ar_res['NAME']}"; 
+    else  
+         $cachearr[$itemId] = "[ $itemId ] "; 
+         
     return $cachearr[$itemId];
-
+ 
 }
 
 

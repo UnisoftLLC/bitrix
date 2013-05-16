@@ -6,22 +6,12 @@ if(!$USER->isAdmin()) die();
  
 if($_REQUEST['action'] == 'compare'){
     
+  
     $v1 = $_REQUEST["v1"];
     $v2 = $_REQUEST["v2"];
- 
     CModule::IncludeModule('remains');
-    
-    $matching = new matching();
-    
-    $matching->Update($v2, array( 'ITEM_ID' => $v1 ));
-    
-    $availability = new availability();
-    
-    $r = $availability->GetList(array(), array('MATCHING_ID'=>$v2));
-    while($res = $r->Fetch()){
-        $availability->Update($res['ID'], array('ITEM_ID' => $v1));
-    }
-    
+    $remains = new remainsHelper();
+    $remains->compare($v2, $v1);
 }
 else {  
     CModule::IncludeModule('iblock');
@@ -57,18 +47,15 @@ else {
       if($arFields['PREVIEW_PICTURE'])
           $arFields['PREVIEW_PICTURE'] = CFile::GetFileArray($arFields['PREVIEW_PICTURE']);
       ?>
-          <tr id="v1_<?=$arFields['ID'];?>"> 
+          <tr id="v1_<?=$arFields['ID'];?>" data-id="<?=$arFields['ID'];?>"> 
               <td>  
-          <input type="radio" name="item" value="<?=$arFields['ID'];?>">
-</td><td> <?=$arFields['NAME'];?>  
-
-  <?
+      <input type="radio" name="item" value="<?=$arFields['ID'];?>">
+</td><td><span class="str"><?=$arFields['NAME'];?></span><? 
 
    
          $link = getSectLink($arFields["IBLOCK_SECTION_ID"]);
  ?> 
 <br><a href="<?=$link?>" target="_blank"><?=$link?></a>
-
 </td> 
 <td><?if($arFields['PREVIEW_PICTURE']){?>
     <img src="<?=$arFields['PREVIEW_PICTURE']['SRC']?>" width="100">

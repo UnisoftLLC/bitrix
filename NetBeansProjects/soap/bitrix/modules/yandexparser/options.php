@@ -82,7 +82,8 @@ if($_REQUEST['settings'] == 'proxy'){
             array("CNT",            'Сколько товаров отправляем за раз', "", array("text","")),
             array("USE_PROXY",      "Используем прокси <br>
                     (<a href='/bitrix/admin/settings.php?lang=ru&mid=yandexparser&mid_menu=1&settings=proxy'>Настройка</a>)", "", array('checkbox', "Y")),
-            );   
+            array("ANTIGATE_KEY",   'Ключ от учетной записи antigate.com', "", array("text","")),
+        );   
 
     $aTabs = array(
             array("DIV" => "edit1", "TAB" => GetMessage("MAIN_TAB_SET"), "ICON" => "translate_settings", "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
@@ -152,8 +153,8 @@ if($_REQUEST['settings'] == 'proxy'){
                     <input type="hidden" name="back_url_settings" value="<?=htmlspecialchars($_REQUEST["back_url_settings"])?>">
             <?endif?>
             <input <?if ($TRANS_RIGHT<"W") echo "disabled" ?> type="submit" name="RestoreDefaults" title="<?echo GetMessage("MAIN_HINT_RESTORE_DEFAULTS")?>" OnClick="confirm('<?echo AddSlashes(GetMessage("MAIN_HINT_RESTORE_DEFAULTS_WARNING"))?>')" value="<?echo GetMessage("MAIN_RESTORE_DEFAULTS")?>">
-            <?=bitrix_sessid_post();?>
-    <?$tabControl->End();?>
+            <?=bitrix_sessid_post(); 
+     $tabControl->End();?>
     </form>
     <?}?>
 

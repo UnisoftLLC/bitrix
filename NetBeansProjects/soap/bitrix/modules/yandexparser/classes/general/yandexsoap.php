@@ -29,13 +29,13 @@ class yandexSoap {
         $arFilter = Array("IBLOCK_ID" => self::$config['IBLOCK'], 
                           "ACTIVE"=>"Y",
                           "!PROPERTY_" . self::$config['PROP_CODE'] => false);
-        
-        $res = CIBlockElement::GetList(Array("PROPERTY_yandexdate" => "ASC"), 
+ 
+        $res = CIBlockElement::GetList(Array("RAND" => "ASC"),
                                        $arFilter,
                                        false,
                                        Array("nTopCount"=>self::$config['CNT']),
                                        $arSelect); 
-        
+         
         while($ob = $res->GetNextElement()){
             $arFields = $ob->GetFields();
             $arProps = $ob->GetProperties(); 
@@ -55,14 +55,14 @@ class yandexSoap {
         $localServer = true;
         $itemsToSend = self::getItemsToSend(); 
         if ($localServer){
-            include_once $_SERVER["DOCUMENT_ROOT"].'/yandexparser/api.php';
-           
+             
+            include_once $_SERVER["DOCUMENT_ROOT"].'/yandexparser/api.php'; 
             $parser = new yandexParser(array('minRating' => 4,
-                                             'offersCount' => 20));
-            
+                                             'offersCount' => 20)); 
             foreach ($itemsToSend as $id => $modelID)
                 $result[$id] = $parser->parse($modelID);
             $ansver = $result;
+             
         } else {
             $client = new SoapClient(self::$config['SOAP_SERVER']);
             $itemsToSend = serialize($itemsToSend);
@@ -70,6 +70,10 @@ class yandexSoap {
             $ansver = $client->sendItems($itemsToSend);
             $ansver = unserialize($ansver);
         } 
+        
+        prent($ansver);
+        
+         
         foreach ($ansver as $k=>$items){ 
             $yp = new yandexPrices();
             $yp->RemoveByItemID($k); 

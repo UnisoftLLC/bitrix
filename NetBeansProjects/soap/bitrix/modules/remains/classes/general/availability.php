@@ -14,22 +14,26 @@
 class availability extends mytpl{
  
     
-     public function Update($id, $arr) { 
+     public function Update($id, $arr, $flag) { 
          if(!$id)
              return;
+         
+         
          parent::Update($id, $arr); 
+         
+         
+         if(!$flag){
          global $DB;
          $DB->Query(
              " UPDATE `". $this->tablename ."` 
                  SET `DATE` = NOW( ) 
                  WHERE `ID` =" . $id);
                  ;
-         
+         }
      }
     
     public function Add($arr){
-        global $DB;
-        
+        global $DB; 
         foreach ($this->fields as $fieldName => $fieldArr) {
             if($fieldArr['TYPE'] == 'INT'){
                 $arr[$fieldName] = intval($arr[$fieldName]);

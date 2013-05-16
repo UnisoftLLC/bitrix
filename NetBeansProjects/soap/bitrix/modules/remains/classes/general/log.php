@@ -21,6 +21,10 @@ class remainsLog extends mytpl{
         if(!$arr['TYPE'])
             $arr['TYPE'] = 1; 
         
+        if($arr['TYPE'] == 'ERROR')  $arr['TYPE'] = 2;
+        
+        if($arr['TYPE'] == 'OK')  $arr['TYPE'] = 1;
+        
         $sqlStr = "INSERT INTO  `" . $this->tablename . "` (
                   `ID` ,  `DATE` , `STR` , `TYPE`, 
                   `N1`,  `N2`,  `N3`, `TIME`)

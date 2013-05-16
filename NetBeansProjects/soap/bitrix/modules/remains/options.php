@@ -1,6 +1,5 @@
 <?php
-$module_id = "remains";
-
+$module_id = "remains"; 
 IncludeModuleLangFile($_SERVER["DOCUMENT_ROOT"].BX_ROOT."/modules/main/options.php"); 
  
 CModule::IncludeModule($module_id); 
@@ -34,7 +33,7 @@ if ($TRANS_RIGHT>="R"){
         
             );   
     $aTabs = array(   
-            array("DIV" => "edit1", "TAB" => 'Сопосталвение остатков', "ICON" => "translate_settings", "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
+            array("DIV" => "edit1", "TAB" => 'Сопоставление остатков', "ICON" => "translate_settings", "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
             array("DIV" => "edit2", "TAB" => GetMessage("MAIN_TAB_SET"), "ICON" => "translate_settings", "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
              array("DIV" => "edit3", "TAB" => 'Загрузка', "ICON" => "translate_settings", "TITLE" => GetMessage("MAIN_TAB_TITLE_SET")),
           
@@ -51,14 +50,16 @@ if ($TRANS_RIGHT>="R"){
                 $uploadfile = $uploaddir . basename($_FILES['f']['name']);
              
                     $f = file_get_contents($_FILES['f']['tmp_name']);
-                    $f = iconv('cp1251', 'utf-8',  $f);
+                  //   $f = iconv('cp1251', 'utf-8',  $f);
                     file_put_contents($uploadfile, $f);
-                    
+      
                     $remainUpdater = new remainUpdater(); 
-                   $arr = $remainUpdater->file2arr($uploadfile);  
-                  $remainUpdater->Update($arr); 
+                    $arr = $remainUpdater->file2arr($uploadfile);  
+                    
+                  $remainUpdater->Update($arr);  
+           
                 unlink($uploadfile); 
-                LocalRedirect('/bitrix/admin/remainslog.php');
+                LocalRedirect('/bitrix/admin/remainslog.php?by=ID&order=desc&'); 
             }
             
 
@@ -111,9 +112,10 @@ if ($TRANS_RIGHT>="R"){
     ?><form method="POST"  enctype="multipart/form-data"  action="<?echo $APPLICATION->GetCurPage()?>?mid=<?=htmlspecialchars($mid)?>&amp;lang=<?=LANGUAGE_ID?>"><?
 
     $tabControl->BeginNextTab();?>
-          
-           <tr>
-               <td width="50%" valign="top" style="border-right: 10px double White;">
+             
+             <tr>
+            
+               <td width="50%" valign="top" style="border-right: 10px double White;" > 
                   <input type="text" id="searchField" value="" style="width: 203px; margin-bottom: 4px; margin-right: 7px;"><button id="searchBtn">Фильтровать</button>
    
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
@@ -143,7 +145,17 @@ $(function(){
        return false;
    });
         
+        $('#searchTable2 .str').live('click', function(){
+          p = $(this).parent().attr('data-id'); 
+          $('#v2_' + p + ' [type=checkbox]').click(); 
+        });
         
+        
+        $('#search_result table .str').live('click', function(){
+               p = $(this).parent().parent().attr('data-id'); 
+          $('#v1_' + p + ' [type=radio]').click(); 
+            
+        });
         
    $('#do').live('click', function(){
        
@@ -152,20 +164,23 @@ $(function(){
          !$('[name = match]:checked').size()){
         return false; 
      }
-      
-   
-       var v1 = $('[name = item]:checked').val();   
-       var v2 = $('[name = match]:checked').val();   
-
-$('#v1_' + v1).hide('slow').remove();
-$('#v2_' + v2).hide('slow').remove(); 
-           
-       $.ajax({
+       
+       vals=[]
+        $('[name = match]:checked').each(function() {
+            vals.push(this.value);
+             $('#v2_' + this.value).hide('slow').remove(); 
+         
+        });
+    
+       var v2 = $('[name = item]:checked').val();   
+ 
+        
+       $.ajax({ 
            url: '/bitrix/admin/adminsearch.php',
            data: {
                'action': 'compare',
-               'v1': v1,
-               'v2': v2
+               'v1': vals,
+               'v2': v2 
            },
            success: function(data){
                
@@ -213,15 +228,12 @@ $('#v2_' + v2).hide('slow').remove();
 
 
   $('#searchBtn').click();
+
+   $('#f2, #filter1, #filter2').live('click', function(){
+ 
+     $('#f2, #filter1, #filter2').attr('disabled','disabled');
   
-
-
-   $('#f2').live('click', function(){
-       
-       
-       
-       
-  if($('#filter1').attr('data-status') == 'up') {
+    if($('#filter1').attr('data-status') == 'up') {
           by = 'ID';
           sort = 'ASC';
       } else
@@ -251,7 +263,8 @@ $('#v2_' + v2).hide('slow').remove();
            success: function(data){
                    
                    $('#searchTable2').html(data);
-                   
+                       $('#f2, #filter1, #filter2').removeAttr('disabled'); 
+          
                 }
            }); 
 
@@ -264,39 +277,23 @@ $('#v2_' + v2).hide('slow').remove();
 </script>
  <div id="search_result" style="height: 580px; overflow: auto;  padding-right: 23px;">
 </div> </td>
-          <td width="50%" valign="top"> 
-             
-                   
-                   <?
-                   $matching = new matching();
-                   $res = $matching->GetList(array('ID'=>'DESC'), array('ITEM_ID'=>0));
-                   ?>
-                   
-                   <input type="text" id="searchField2"><button id="f2">Фильтровать</button>
-                   <button class="sortbtn" id="filter1" data-status="up">По новизне &uarr;</button>
+
+
+
+          <td width="50%" valign="top">  
+                      <input type="text" id="searchField2"><button id="f2">Фильтровать</button>  
+                    <button class="sortbtn" id="filter1" data-status="up">По новизне &uarr;</button>
                    <button class="sortbtn" id="filter2" data-status="">По названию</button>
                    <table id="searchTable2"> 
-                     <?
-                       while ($el = $res->Fetch()){
-                        ?> <tr id="v2_<?=$el['ID'];?>"><td>  
-                              <input type="radio" name="match" value="<?=$el['ID'];?>">
-                            </td>
-                            <td> <?=$el['NAME'];?></td>
-                            <td><? 
-                            $res1 = CIBlockElement::GetByID($el["SUPPLIER_ID"]);
-                            if($ar_res = $res1->GetNext())
-                              echo $ar_res['NAME'];
-                             ?></td>
-                            <td><button class="deleteBtn" data-id="<?=$el['ID'];?>">Удалить</button>
-                                </td>
-                           </tr>  
-                       <?}?>
                    </table>  
                </td>
+               
+          
+
            </tr> 
            <tr>
                <td align="center" colspan="2"> 
-                   <button id="do">Сопоставить</button>
+                <button id="do">Сопоставить</button> 
                </td>
            </td>    
          

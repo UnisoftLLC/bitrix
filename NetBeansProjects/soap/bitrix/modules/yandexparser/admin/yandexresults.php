@@ -13,12 +13,14 @@ $lAdmin = new CAdminList($sTableID, $oSort); // основной объект с
  
 $ids = yandexPrices::GetAllSuccessId();
 
-$arSelect = Array("ID", "NAME", "ACTIVE", "IBLOCK_ID", "PROPERTY_yandexdate", "CODE",
+$arSelect = Array("ID", "NAME", "ACTIVE", "IBLOCK_ID", "PROPERTY_yandexdate",
+    "CODE", "DETAIL_PAGE_URL", 
                   "CATALOG_GROUP_1"); 
 $arFilter = Array("IBLOCK_ID"=>1,
                   "ID" => $ids );
-$rsData =  CIBlockElement::GetList(Array(), $arFilter, false, false, $arSelect);
- 
+
+$rsData =  CIBlockElement::GetList(Array($_REQUEST['by'] => $_REQUEST['order']), $arFilter, false, false, $arSelect);
+
 $rsData = new CAdminResult($rsData, $sTableID);
 $rsData->NavStart();
 
@@ -28,7 +30,7 @@ $lAdmin->AddHeaders(array(
   array("id"    =>"ID",
     "content"  =>"ID",
     "sort"     =>"id",
-    "default"  =>true, 
+    "default"  =>false, 
   ),
   array(  "id"    =>"NAME",
     "content"  =>'Наименование товара', 
@@ -38,40 +40,36 @@ $lAdmin->AddHeaders(array(
   array(  "id"    =>"CODE",
     "content"  =>'Путь категории по каталогу', 
     "sort"     =>"CODE",
-    "default"  =>true,
+    "default"  =>false,
   ),
    array(  "id"    =>"CATALOG_PRICE_1",
     "content"  =>'Стоимость товара', 
     "sort"     =>"CATALOG_PRICE_1",
-    "default"  =>true,
+    "default"  =>false,
   ),
    array(  "id"    =>"PROPERTY_YANDEXDATE_VALUE",
     "content"  =>'Дата обновления Я.М.', 
     "sort"     =>"PROPERTY_yandexdate",
-    "default"  =>true,
+    "default"  =>false,
   ),
    array(  "id"    =>"SECTION_CODE4",
     "content"  =>'Дата обновления цены', 
     "sort"     =>"SECTION_CODE",
-    "default"  =>true,
-  ),
-   array(  "id"    =>"LINK",
-    "content"  =>'Ссылка на редактирование цены', 
-    "sort"     =>"LINK",
-    "default"  =>true,
-  ),
-     
-    
+    "default"  =>false,
+  ),  
 ));
 
  
 
-while($arRes = $rsData->NavNext(true, "f_")):
-     
+while($arRes = $rsData->Fetch()):
+    
    $arRes['PROPERTY_YANDEXDATE_VALUE'] = substr($arRes['PROPERTY_YANDEXDATE_VALUE'], 0, 10);
+   
+   $row =&$lAdmin->AddRow($f_ID, $arRes, 'iblock_element_edit.php?IBLOCK_ID=1&type=catalog&ID=260&lang=ru&find_section_section=-1&WF=Y', 'sd');
+
+   $row->AddViewField("NAME", '<a href="/bitrix/admin/iblock_element_edit.php?IBLOCK_ID=1&type=catalog&ID=' . $arRes['ID'] . '&lang=ru&force_catalog=&filter_section=0">' . $arRes['NAME'].'</a>');
   
-   $row =&$lAdmin->AddRow($f_ID, $arRes);
-endwhile;
+   endwhile;
  
 $APPLICATION->SetTitle('Успешно обработаные');
  
