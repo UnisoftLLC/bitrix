@@ -24,5 +24,12 @@ $APPLICATION->SetTitle("Корзина");
 		"PROP_2" => array()
 	)
 );?>
-
+<?if($_REQUEST['pay'] == 'Y'){
+    ?>
+<script>
+$(function(){
+    $('#pay').submit(); 
+});</script>
+<?
+}?>
 <? require($_SERVER["DOCUMENT_ROOT"] . "/bitrix/footer.php"); ?>

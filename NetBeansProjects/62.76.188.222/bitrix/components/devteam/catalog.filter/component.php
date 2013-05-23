@@ -69,6 +69,19 @@ elseif ($obCache->StartDataCache()){
             $arResult['PROPS'][$prop_fields['CODE']] = $prop_fields;
         }
    } 
+   $res = CIBlockElement::GetList(array('CATALOG_PRICE_2'=>'DESC'), 
+                                   array("IBLOCK_ID"=>$arParams["IBLOCK_ID"],
+                                         'SECTION_ID'=>$arParams["SECTION_ID"]),
+                                   false, 
+                                   array("nPageSize"=>1),
+                                   array("ID", "IBLOCK_ID", "CATALOG_GROUP_2"));
+   if($ob = $res->GetNextElement()) {
+        $arFields = $ob->GetFields();
+        $arResult['PROPS']['PRICE']['VALUES_']['MAX_'] = $arFields['CATALOG_PRICE_2'];
+        //поскольку там шаг слайдера стоит 100, то сделай плиз чтоб максимальное число было ровным 100, 1000 и т. д.
+        while($arResult['PROPS']['PRICE']['VALUES_']['MAX_'] % 1000 !== 0)
+            $arResult['PROPS']['PRICE']['VALUES_']['MAX_']++;
+   } 
    $obCache->EndDataCache($arResult['PROPS']); 
 } 
 
@@ -85,7 +98,7 @@ foreach($_REQUEST['filter'] as $filterName => $val){
             case 'min_price': 
                 $val = intval($val);
                 $arrFilter['>=CATALOG_PRICE_2'] = $val;
-                $arResult['PROPS']['PRICE']['VALUES_']['MIN'] = $val;
+                $arResult['PROPS']['PRICE']['VALUES_']['MIN'] = $val; 
                 break;
             case 'max_price':
                 $val = intval($val);

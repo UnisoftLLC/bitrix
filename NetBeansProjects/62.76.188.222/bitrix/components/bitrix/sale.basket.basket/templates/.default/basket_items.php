@@ -183,7 +183,7 @@ echo GetMessage("STB_ORDER_PROMT"); ?>
 			<input type="submit" value="<?echo GetMessage("SALE_REFRESH")?>" name="BasketRefresh"><br />
 			<small><?echo GetMessage("SALE_REFRESH_DESCR")?></small><br />
 		</td>
-		<td align="right" width="40%">&nbsp;</td>
+		<td align="right" width="40%" valign="top"><?if(strlen($arResult["PREPAY_BUTTON"]) > 0) echo $arResult["PREPAY_BUTTON"];?></td>
 		<td align="right" width="30%">
 			<input type="submit" value="<?echo GetMessage("SALE_ORDER")?>" name="BasketOrder"  id="basketOrderButton2"><br />
 			<small><?echo GetMessage("SALE_ORDER_DESCR")?></small><br />

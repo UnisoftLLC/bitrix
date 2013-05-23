@@ -28,6 +28,7 @@ $arParams["COUNT_DISCOUNT_4_ALL_QUANTITY"] = (($arParams["COUNT_DISCOUNT_4_ALL_Q
 
 //$arParams['PRICE_VAT_INCLUDE'] = $arParams['PRICE_VAT_INCLUDE'] == 'N' ? 'N' : 'Y';
 $arParams['PRICE_VAT_SHOW_VALUE'] = $arParams['PRICE_VAT_SHOW_VALUE'] == 'N' ? 'N' : 'Y';
+$arParams["USE_PREPAYMENT"] = $arParams["USE_PREPAYMENT"] == 'Y' ? 'Y' : 'N';
 
 $arParams["WEIGHT_UNIT"] = htmlspecialcharsbx(COption::GetOptionString('sale', 'weight_unit', "", SITE_ID));
 $arParams["WEIGHT_KOEF"] = htmlspecialcharsbx(COption::GetOptionString('sale', 'weight_koef', 1, SITE_ID));
@@ -67,7 +68,7 @@ if (strlen($_REQUEST["BasketRefresh"]) > 0 || strlen($_REQUEST["BasketOrder"]) >
 			$quantityTmp = $arBasketItems['QUANTITY'];
 		else
 			$quantityTmp = $arParams['QUANTITY_FLOAT'] == 'Y' ? DoubleVal($_REQUEST["QUANTITY_".$arBasketItems["ID"]]) : IntVal($_REQUEST["QUANTITY_".$arBasketItems["ID"]]);
-		
+
 		$deleteTmp = (($_REQUEST["DELETE_".$arBasketItems["ID"]] == "Y") ? "Y" : "N");
 		$delayTmp = (($_REQUEST["DELAY_".$arBasketItems["ID"]] == "Y") ? "Y" : "N");
 
@@ -215,90 +216,45 @@ $arResult["ShowDelay"] = (($bShowDelay)?"Y":"N");
 $arResult["ShowNotAvail"] = (($bShowNotAvail)?"Y":"N");
 $arResult["ShowSubscribe"] = (($bShowSubscribe)?"Y":"N");
 
-$dbDiscount = CSaleDiscount::GetList(
-		array("SORT" => "ASC"),
-		array(
-				"LID" => SITE_ID,
-				"ACTIVE" => "Y",
-				"!>ACTIVE_FROM" => Date($DB->DateFormatToPHP(CSite::GetDateFormat("FULL"))),
-				"!<ACTIVE_TO" => Date($DB->DateFormatToPHP(CSite::GetDateFormat("FULL"))),
-				"<=PRICE_FROM" => $allSum,
-				">=PRICE_TO" => $allSum,
-				"USER_GROUPS" => $USER->GetUserGroupArray(),
-			),
-		false,
-		false,
-		array("*")
-	);
-$arMinDiscount = array();
-$dblMinPrice = $allSum;
-$arResult["DISCOUNT_PRICE"] = 0;
-$arResult["DISCOUNT_PERCENT"] = 0;
-while ($arDiscount = $dbDiscount->Fetch())
-{
-	$dblDiscount = 0;
-	$allSum_tmp = $allSum;
-	if ($arDiscount["DISCOUNT_TYPE"] == "P")
-	{
-		if($arParams["COUNT_DISCOUNT_4_ALL_QUANTITY"] == "Y")
-		{
-			foreach ($arResult["ITEMS"]["AnDelCanBuy"] as $arResultItem)
-			{
-				$curDiscount = roundEx(DoubleVal($arResultItem["PRICE"]) * DoubleVal($arResultItem["QUANTITY"]) * $arDiscount["DISCOUNT_VALUE"] / 100, SALE_VALUE_PRECISION);
-				$dblDiscount += $curDiscount;
-			}
-		}
-		else
-		{
-			foreach ($arResult["ITEMS"]["AnDelCanBuy"] as $arResultItem)
-			{
-				$curDiscount = roundEx(DoubleVal($arResultItem["PRICE"]) * $arDiscount["DISCOUNT_VALUE"] / 100, SALE_VALUE_PRECISION);
-				$dblDiscount += $curDiscount * DoubleVal($arResultItem["QUANTITY"]);
-			}
-		}
-	}
-	else
-	{
-		$dblDiscount = roundEx(CCurrencyRates::ConvertCurrency($arDiscount["DISCOUNT_VALUE"], $arDiscount["CURRENCY"], $allCurrency), SALE_VALUE_PRECISION);
-	}
-	$allSum = $allSum - $dblDiscount;
-	if ($dblMinPrice > $allSum)
-	{
-		$dblMinPrice = $allSum;
-		$arMinDiscount = $arDiscount;
-	}
-	$allSum = $allSum_tmp;
-}
+$arOrder = array(
+	'SITE_ID' => SITE_ID,
+	'USER_ID' => $USER->GetID(),
+	'ORDER_PRICE' => $allSum,
+	'ORDER_WEIGHT' => $allWeight,
+	'BASKET_ITEMS' => $arResult["ITEMS"]["AnDelCanBuy"]
+);
 
-if (!empty($arMinDiscount))
-{
-	if ($arMinDiscount["DISCOUNT_TYPE"] == "P")
-	{
-		$arResult["DISCOUNT_PERCENT"] = $arMinDiscount["DISCOUNT_VALUE"];
-		for ($bi = 0; $bi < count($arResult["ITEMS"]["AnDelCanBuy"]); $bi++)
-		{
-			if($arParams["COUNT_DISCOUNT_4_ALL_QUANTITY"] == "Y")
-			{
-				$curDiscount = roundEx(DoubleVal($arResult["ITEMS"]["AnDelCanBuy"][$bi]["PRICE"]) * DoubleVal($arResult["ITEMS"]["AnDelCanBuy"][$bi]["QUANTITY"]) * $arMinDiscount["DISCOUNT_VALUE"] / 100, SALE_VALUE_PRECISION);
-				$arResult["DISCOUNT_PRICE"] += $curDiscount;
-			}
-			else
-			{
-				$curDiscount = roundEx(DoubleVal($arResult["ITEMS"]["AnDelCanBuy"][$bi]["PRICE"]) * $arMinDiscount["DISCOUNT_VALUE"] / 100, SALE_VALUE_PRECISION);
-				$arResult["DISCOUNT_PRICE"] += $curDiscount * DoubleVal($arResult["ITEMS"]["AnDelCanBuy"][$bi]["QUANTITY"]);
-			}
-		}
-		$arResult["DISCOUNT_PERCENT_FORMATED"] = DoubleVal($arResult["DISCOUNT_PERCENT"])."%";
-	}
-	else
-	{
-		$arResult["DISCOUNT_PRICE"] = CCurrencyRates::ConvertCurrency($arMinDiscount["DISCOUNT_VALUE"], $arMinDiscount["CURRENCY"], $allCurrency);
-		$arResult["DISCOUNT_PRICE"] = roundEx($arResult["DISCOUNT_PRICE"], SALE_VALUE_PRECISION);
-	}
-	$allSum = $allSum - $arResult["DISCOUNT_PRICE"];
-}
+$arOptions = array(
+	'COUNT_DISCOUNT_4_ALL_QUANTITY' => $arParams["COUNT_DISCOUNT_4_ALL_QUANTITY"],
+);
 
-$DISCOUNT_PRICE_ALL += $arResult["DISCOUNT_PRICE"];
+$arErrors = array();
+
+CSaleDiscount::DoProcessOrder($arOrder, $arOptions, $arErrors);
+
+$allSum = 0;
+$allWeight = 0;
+$allVATSum = 0;
+
+$DISCOUNT_PRICE_ALL = 0;
+foreach ($arOrder['BASKET_ITEMS'] as &$arOneItem)
+{
+	$allSum += ($arOneItem["PRICE"] * $arOneItem["QUANTITY"]);
+	$allWeight += ($arOneItem["WEIGHT"] * $arOneItem["QUANTITY"]);
+	$arOneItem["PRICE_VAT_VALUE"] = 0;
+	if (array_key_exists('VAT_VALUE', $arOneItem))
+		$arOneItem["PRICE_VAT_VALUE"] = $arOneItem["VAT_VALUE"];
+	$allVATSum += roundEx($arOneItem["PRICE_VAT_VALUE"] * $arOneItem["QUANTITY"], SALE_VALUE_PRECISION);
+	$arOneItem["PRICE_FORMATED"] = SaleFormatCurrency($arOneItem["PRICE"], $arOneItem["CURRENCY"]);
+	$arOneItem["DISCOUNT_PRICE_PERCENT"] = $arOneItem["DISCOUNT_PRICE"]*100 / ($arOneItem["DISCOUNT_PRICE"] + $arOneItem["PRICE"]);
+	$arOneItem["DISCOUNT_PRICE_PERCENT_FORMATED"] = roundEx($arOneItem["DISCOUNT_PRICE_PERCENT"], SALE_VALUE_PRECISION)."%";
+	$DISCOUNT_PRICE_ALL += $arOneItem["DISCOUNT_PRICE"] * $arOneItem["QUANTITY"];
+}
+if (isset($arOneItem))
+	unset($arOneItem);
+
+$arResult["ITEMS"]["AnDelCanBuy"] = $arOrder['BASKET_ITEMS'];
+
 $arResult["allSum"] = $allSum;
 $arResult["allWeight"] = $allWeight;
 $arResult["allWeight_FORMATED"] = roundEx(DoubleVal($allWeight/$arParams["WEIGHT_KOEF"]), SALE_VALUE_PRECISION)." ".$arParams["WEIGHT_UNIT"];
@@ -322,6 +278,69 @@ if(count($arBasketItems)<=0)
 
 $arResult["DISCOUNT_PRICE_ALL"] = $DISCOUNT_PRICE_ALL;
 $arResult["DISCOUNT_PRICE_ALL_FORMATED"] = SaleFormatCurrency($DISCOUNT_PRICE_ALL, $allCurrency);
+
+
+if($arParams["USE_PREPAYMENT"] == "Y")
+{
+	if(doubleval($arResult["allSum"]) > 0)
+	{
+		$personType = array();
+		$dbPersonType = CSalePersonType::GetList(Array("SORT" => "ASC", "NAME" => "ASC"), Array("LID" => SITE_ID, "ACTIVE" => "Y"));
+		while($arPersonType = $dbPersonType->GetNext())
+		{
+			$personType[] = $arPersonType["ID"];
+		}
+
+		if(!empty($personType))
+		{
+			$dbPaySysAction = CSalePaySystemAction::GetList(
+					array(),
+					array(
+							"PS_ACTIVE" => "Y",
+							"HAVE_PREPAY" => "Y",
+							"PERSON_TYPE_ID" => $personType,
+						),
+					false,
+					false,
+					array("ID", "PAY_SYSTEM_ID", "PERSON_TYPE_ID", "NAME", "ACTION_FILE", "RESULT_FILE", "NEW_WINDOW", "PARAMS", "ENCODING", "LOGOTIP")
+				);
+			if ($arPaySysAction = $dbPaySysAction->Fetch())
+			{
+				CSalePaySystemAction::InitParamArrays(false, false, $arPaySysAction["PARAMS"]);
+
+				$pathToAction = $_SERVER["DOCUMENT_ROOT"].$arPaySysAction["ACTION_FILE"];
+
+				$pathToAction = str_replace("\\", "/", $pathToAction);
+				while (substr($pathToAction, strlen($pathToAction) - 1, 1) == "/")
+					$pathToAction = substr($pathToAction, 0, strlen($pathToAction) - 1);
+
+				if (file_exists($pathToAction))
+				{
+					if (is_dir($pathToAction) && file_exists($pathToAction."/pre_payment.php"))
+						$pathToAction .= "/pre_payment.php";
+
+					include_once($pathToAction);
+					$psPreAction = new CSalePaySystemPrePayment;
+					if($psPreAction->init())
+					{
+						$orderData = array(
+								"PATH_TO_ORDER" => $arParams["PATH_TO_ORDER"],
+								"AMOUNT" => $arResult["allSum"],
+							);
+						if(!$psPreAction->BasketButtonAction($orderData))
+						{
+							if($e = $APPLICATION->GetException())
+								$arResult["WARNING_MESSAGE"][] = $e->GetString();
+						}
+
+						$arResult["PREPAY_BUTTON"] = $psPreAction->BasketButtonShow();
+					}
+				}
+
+			}
+		}
+	}
+}
 
 $this->IncludeComponentTemplate();
 ?>

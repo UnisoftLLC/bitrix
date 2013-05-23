@@ -9,7 +9,6 @@ if (StrLen($arResult["ERROR_MESSAGE"])<=0)
 			echo ShowError($v);
 		}
 	}
-
 	?>
 	<form method="post" action="<?=POST_FORM_ACTION_URI?>" name="basket_form">
 		<?

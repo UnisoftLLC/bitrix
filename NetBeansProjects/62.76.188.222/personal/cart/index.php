@@ -3,8 +3,8 @@ $APPLICATION->SetTitle("Корзина");
 ?>
 
 <?$APPLICATION->IncludeComponent(
-	"bitrix:sale.basket.basket",
-	"",
+	"devteam:sale.basket.basket",
+	"", 
 	array(
 	"COUNT_DISCOUNT_4_ALL_QUANTITY" => "N",
 	"COLUMNS_LIST" => array(

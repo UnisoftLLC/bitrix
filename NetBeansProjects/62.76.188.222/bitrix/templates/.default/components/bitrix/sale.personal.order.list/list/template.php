@@ -21,8 +21,7 @@ else
 <?
 if($arResult["ORDER_BY_STATUS"]){
 foreach ($arResult["ORDER_BY_STATUS"] as $key => $orderArr) {
-    foreach ($orderArr as $id => $order) {
-        //prent($order);
+    foreach ($orderArr as $id => $order) { 
         ?>  
         <section class="b-detail">
             <div class="b-detail-content clearfix">
@@ -40,7 +39,7 @@ foreach ($arResult["ORDER_BY_STATUS"] as $key => $orderArr) {
                                         <? if ($order["ORDER"]["PAYED"] == "Y") { ?>
                                             Да
                                         <? } else { ?>
-                                            Нет
+                                            Нет (<a href="/personal/order/make/?ORDER_ID=<?=$order["ORDER"]['ID'];?>">Перейти к оплате</a>)
                                         <? } ?>
                                     </td>
                                 </tr>

@@ -1,7 +1,4 @@
-<?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();
-?>
-
-
+<?if(!defined("B_PROLOG_INCLUDED") || B_PROLOG_INCLUDED !== true) die();?>
 <section class="b-detail">
         <div class="b-detail-content">
      
@@ -34,10 +31,8 @@
                 <div class="b-field__input"><input type="text"  name="LOGIN" maxlength="50" value="<? echo $arResult["arUser"]["LOGIN"]?>"  class="b-text"></div>
                 <div class="b-field__info"></div>
         </div>
-</div>
-
-    
-    <div class="b-field">
+</div> 
+  <div class="b-field">
         <label class="b-field__label">Новый пароль: </label>
         <div class="b-field__wrapper clearfix">
                 <div class="b-field__input"><input  type="password" name="NEW_PASSWORD" maxlength="50" value="" autocomplete="off"  class="b-text"></div>
@@ -50,19 +45,10 @@
                 <div class="b-field__input"><input  type="password" name="NEW_PASSWORD_CONFIRM" maxlength="50" value="" autocomplete="off"  class="b-text"></div>
                 <div class="b-field__info"></div>
         </div>
-</div>
- 
-    
-    
-    
+</div> 
 </div>
 <h3 class="b-h3">Личные данные <a class="b-uc__edit" href="#">изменить</a></h3>
 <div class="b-checkout">
-
- 
- 
-
-
 <div class="b-field">
         <label class="b-field__label">E-Mail: <span class="starrequired">*</span></label>
         <div class="b-field__wrapper clearfix">
@@ -70,13 +56,28 @@
                 <div class="b-field__info"></div>
         </div>
 </div>
-
-
-
+<div class="b-field">
+    <label class="b-field__label">Телефон</label>
+    <div class="b-field__wrapper clearfix">
+            <div class="b-field__input"><input type="text" name="PERSONAL_PHONE" maxlength="50" value="<?=$arResult["arUser"]["PERSONAL_PHONE"]?>" class="b-text"></div>
+            <div class="b-field__info"></div>
+    </div>
+</div> 
+<div class="b-field">
+        <label class="b-field__label">Индекс</label>
+        <div class="b-field__wrapper clearfix">
+                <div class="b-field__input"><input type="text" name="PERSONAL_ZIP" maxlength="50" value="<?=$arResult["arUser"]["PERSONAL_ZIP"]?>" class="b-text"></div>
+                <div class="b-field__info"></div>
+        </div>
+</div>    
+<div class="b-field">
+        <label class="b-field__label">Адрес доставки</label>
+        <div class="b-field__wrapper clearfix">
+                <div class="b-field__input"><input type="text" name="PERSONAL_STREET" maxlength="50" value="<?=$arResult["arUser"]["PERSONAL_STREET"]?>" class="b-text"></div>
+                <div class="b-field__info"></div>
+        </div>
 </div>
-
-
-
+</div>
 <div>       
 <input type="submit" name="save"  class="b-button" value="<?=(($arResult["ID"]>0) ? GetMessage("MAIN_SAVE") : GetMessage("MAIN_ADD"))?>"></div>
 </form>

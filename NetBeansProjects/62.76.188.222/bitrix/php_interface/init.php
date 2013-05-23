@@ -147,9 +147,6 @@ function prent($arr){
     echo "</pre>";
 }
  
-
- 
-
 AddEventHandler("main", "OnEpilog", "OnEpilogHandler");
   
 function OnEpilogHandler() {
@@ -237,13 +234,9 @@ function getProps2Card($IBLOCK_ID, $section){
  
     return $props; 
 }
-
-
-
+  
 AddEventHandler("main", "OnBeforeUserRegister", "OnBeforeUserRegisterHandler"); 
 function OnBeforeUserRegisterHandler(&$arFields) {
-  //  if ($_POST["NEW_GENERATE"] == "Y"){
- 
         $arEventFields = array(
                 "LOGIN"       =>      $arFields["LOGIN"],
                 "PASSWORD"   =>     $arFields["PASSWORD"],
@@ -251,10 +244,27 @@ function OnBeforeUserRegisterHandler(&$arFields) {
                 "NAME"       =>     $arFields["NAME"],
                 "LAST_NAME"   =>      $arFields["LAST_NAME"],
              ); 
-        
         CEvent::Send("REG", 's1', $arEventFields);
-  
- //   }
 }
-
  
+AddEventHandler("sale", "OnBeforeBasketAdd", "OnBeforeBasketAdd"); 
+function OnBeforeBasketAdd(&$arFields){  
+     global $USER;
+     if($USER->IsAuthorized()){
+        CModule::IncludeModule('tc');
+        $rsUser = CUser::GetByID($USER->GetID());
+        $arUser = $rsUser->Fetch();
+        if($arUser['UF_CARD_MODERATED']){
+            $tcCards = new tcCards();
+            $res = $tcCards->GetByNum($arUser['UF_CARD']);
+            if($card = $res->Fetch()){
+                 $cardnomer = $card["nomer"];
+                 $proc = $card["procent"];  
+                 if($proc){
+                     $arFields["PRICE"] = $arFields["PRICE"] / 100 * (100 - $proc);
+                     $arFields["CALLBACK_FUNC"] = '';
+                 }
+            }
+        }
+    }
+}

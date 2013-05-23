@@ -1,6 +1,5 @@
-<?php require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");?>
-
-    
+<?
+require($_SERVER["DOCUMENT_ROOT"]."/bitrix/header.php");?>
 <!-- подключение нужных файлов (begin) -->
 <link rel="stylesheet" href="/slider/b-slider.css">
 <script src="/slider/slider.js"></script>

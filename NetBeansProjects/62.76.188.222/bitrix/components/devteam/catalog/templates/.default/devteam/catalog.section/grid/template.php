@@ -3,7 +3,7 @@
 <?
 if($arResult["ITEMS"]){  
 $icons = array('PRODUCT_DAY' => 'm-item-of-the-day',
-               'SALE'        => 'm-item-sale',
+               'SALE'        => 'm-item-sale', 
                'NEW'         => 'm-item-new',
                'TOP_SALES'   => 'm-item-hit',
                'RECOMMENDED' => 'm-item-recommended' );     
@@ -23,8 +23,19 @@ foreach($icons as $icon_code => $class){
     if($arElement['PROPERTIES'][$icon_code]["VALUE_XML_ID"] == 'Y'){
          echo " {$class}"; $show_product_icon = true; break;
         }
-   } 
- ?>" id="<?=$this->GetEditAreaId($arElement['ID']);?>" >
+   }
+
+if(!$show_product_icon){
+    foreach ($arElement["PRICES"] as $code => $arPrice){
+        if ($arPrice["CAN_ACCESS"]){
+            if ($arPrice["DISCOUNT_VALUE"] < $arPrice["VALUE"]) {
+                 echo " m-item-sale"; $show_product_icon = true; break;
+            }
+        }
+    }
+}
+ 
+?>" id="<?=$this->GetEditAreaId($arElement['ID']);?>" >
 
 <?if($show_product_icon){?>
 <div class="b-product-icon"></div>
@@ -67,9 +78,9 @@ foreach($icons as $icon_code => $class){
 <? if ($arPrice["CAN_ACCESS"]): ?>
 <? if ($arPrice["DISCOUNT_VALUE"] < $arPrice["VALUE"]): ?>
                            
-            <div class="b-price__new"><span class="b-price"><?= $arPrice["PRINT_DISCOUNT_VALUE"] ?> </span></div>
-            <div class="b-price__old"><span class="b-price__small"><?= $arPrice["PRINT_VALUE"] ?> </span></div>
- 
+    <div class="b-price__new"><span class="b-price"><?= $arPrice["PRINT_DISCOUNT_VALUE"] ?> </span></div>
+    <div class="b-price__old"><span class="b-price__small"><?= $arPrice["PRINT_VALUE"] ?> </span></div>
+
  <? else: ?><span class="b-price"><?= $arPrice["PRINT_VALUE"] ?></span><? endif; ?>
 <? endif; ?> 
 <? endforeach; ?>

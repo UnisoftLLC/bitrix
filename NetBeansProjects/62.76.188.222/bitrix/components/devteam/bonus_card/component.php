@@ -7,6 +7,7 @@ if(isset($_REQUEST['card'])){
     $user->Update($USER->GetID(),
                   Array("UF_CARD"           => $card , 
                         "UF_CARD_MODERATED" => false));
+    CEvent::Send("CARD_ADD", 's1', array("USER_ID" => $USER->GetID())); 
     $arResult['ADDED'] = true;
 }
 $rsUser = CUser::GetByID($USER->GetID());
@@ -15,7 +16,7 @@ if($arUser['UF_CARD_MODERATED']){
     $tcCards = new tcCards();
     $res = $tcCards->GetByNum($arUser['UF_CARD']);
     if($card = $res->Fetch()){ 
-        //  array(7) {
+        //array(7) {
         //  ["id"]=>
         //  string(6) "191949"
         //  ["vladelec"]=>
@@ -29,9 +30,8 @@ if($arUser['UF_CARD_MODERATED']){
         //  ["nomer"]=>
         //  string(6) "004756"
         //  ["tipsidki"]=>
-        //  string(39) "Накопительная скидка"
-        //} 
-        $arResult['CARD'] = $card; 
+        //  string(39) "Накопительная скидка" 
+        $arResult['CARD'] = $card;   
     } 
 }
 $this->IncludeComponentTemplate();

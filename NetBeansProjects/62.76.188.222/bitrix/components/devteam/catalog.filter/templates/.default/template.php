@@ -334,14 +334,18 @@
         break;
         case 'PRICE':   
       
+            if(!$property["VALUES_"]['MAX_'])
+                $property["VALUES_"]['MAX_'] = 100000;
+            
             if(!$property["VALUES_"]['MIN'])
-                $property["VALUES_"]['MIN'] = 1000;
+                $property["VALUES_"]['MIN'] = 0;
             if(!$property["VALUES_"]['MAX'])
-                $property["VALUES_"]['MAX'] = 100000;
+                $property["VALUES_"]['MAX'] = $property["VALUES_"]['MAX_'];
+             
             ?>
             <script>
             $(function(){ 
-                var slider_min = 0, slider_max = 100000;
+                var slider_min = 0, slider_max = <?=$property["VALUES_"]['MAX_']?>;
 
                 $("#SLIDER_MIN").numOnly();
                 $("#SLIDER_MAX").numOnly();
@@ -378,7 +382,7 @@
                         range: true,
                         min: slider_min,
                         max: slider_max,
-                        step: 1000,
+                        step: 100,
                         values: [ <?=$property["VALUES_"]['MIN']?>, <?=$property["VALUES_"]['MAX']?> ],
                         create: function(event, ui) {
                                 $("#SLIDER_MIN").val($(this).slider("values", 0));
